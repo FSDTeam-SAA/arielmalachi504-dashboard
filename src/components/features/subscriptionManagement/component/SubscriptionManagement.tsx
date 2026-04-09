@@ -1,104 +1,144 @@
-"use client";
-
-import { CheckCircle2 } from "lucide-react";
-
-const plans = [
-    {
-        id: 1,
-        title: "Basic Pack",
-        subtitle: "Start Creating with Ease",
-        price: "$0",
-        period: "/month",
-        features: [
-            "50 Credits included",
-            "Ideal for beginners",
-            "Create posters and logos",
-            "Easy credit based usage",
-            "No monthly commitment",
-        ],
-        highlighted: false,
-    },
-    {
-        id: 2,
-        title: "Standard Pack",
-        subtitle: "Best Value for High Volume Design",
-        price: "$49",
-        period: "/month",
-        features: [
-            "300 Credits included",
-            "Ideal for professionals and teams",
-            "Create unlimited posters and logos within credits",
-            "Cost effective for frequent usage",
-            "No subscription required",
-        ],
-        highlighted: true,
-        badge: "Most Popular",
-    },
-    {
-        id: 3,
-        title: "Premium Pack",
-        subtitle: "Unlock Maximum Creativity with Premium Credits",
-        price: "$99",
-        period: "/month",
-        features: [
-            "500 Credits included",
-            "Best for frequent design creation",
-            "Create posters and logos anytime",
-            "More value per credit",
-            "No monthly subscription required",
-        ],
-        highlighted: false,
-    },
-];
+"use client"
+import { CheckCircle2, Loader2, Plus, Trash2, Edit2 } from "lucide-react";
+import { useState } from "react";
+import {
+    useSubscriptions,
+    useCreateSubscription,
+    useUpdateSubscription,
+    useDeleteSubscription
+} from "../hooks/subscriptionHooks";
+import { SubscriptionModal } from "./SubscriptionModal";
+import { SubscriptionPlan, CreateSubscriptionPlan } from "@/components/features/subscriptionManagement/types/subscription";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function SubscriptionManagement() {
+    const { data: plans, isLoading, isError } = useSubscriptions();
+    const createMutation = useCreateSubscription();
+    const updateMutation = useUpdateSubscription();
+    const deleteMutation = useDeleteSubscription();
+
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedPlan, setSelectedPlan] = useState<SubscriptionPlan | null>(null);
+
+    const handleCreate = () => {
+        setSelectedPlan(null);
+        setIsModalOpen(true);
+    };
+
+    const handleEdit = (plan: SubscriptionPlan) => {
+        setSelectedPlan(plan);
+        setIsModalOpen(true);
+    };
+
+    const handleDelete = (id: string) => {
+        if (window.confirm("Are you sure you want to delete this plan?")) {
+            deleteMutation.mutate(id);
+        }
+    };
+
+    const handleSubmit = (data: CreateSubscriptionPlan) => {
+        if (selectedPlan) {
+            updateMutation.mutate(
+                { id: selectedPlan._id, data },
+                {
+                    onSuccess: () => setIsModalOpen(false),
+                }
+            );
+        } else {
+            createMutation.mutate(data, {
+                onSuccess: () => setIsModalOpen(false),
+            });
+        }
+    };
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-[#eef4f8] p-4 md:p-6">
+                <div className="mx-auto max-w-[1500px]">
+                    <div className="mb-6 flex justify-end">
+                        <Skeleton className="h-11 w-32" />
+                    </div>
+                    <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+                        {[1, 2, 3].map((i) => (
+                            <Skeleton key={i} className="h-[500px] w-full rounded-[16px]" />
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (isError) {
+        return (
+            <div className="flex min-h-screen items-center justify-center p-4">
+                <div className="text-center">
+                    <h2 className="text-2xl font-bold text-red-500">Error loading subscriptions</h2>
+                    <p className="mt-2 text-gray-600">Please try again later.</p>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <section className="min-h-screen bg-[#eef4f8] p-4 md:p-6">
             <div className="mx-auto max-w-[1500px]">
                 <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
-                    <button className="h-11 rounded-md border border-[#5ab2ff] bg-white px-6 text-sm font-medium text-[#35a1ff] transition hover:bg-[#f7fbff]">
+                    <Button
+                        onClick={handleCreate}
+                        className="h-11 rounded-md border border-[#5ab2ff] bg-white px-6 text-sm font-medium text-[#35a1ff] transition hover:bg-[#f7fbff]"
+                        variant="outline"
+                    >
+                        <Plus className="mr-2 h-4 w-4" />
                         Create Plan
-                    </button>
+                    </Button>
                 </div>
 
                 <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-                    {plans.map((plan) => (
-                        <PlanCard
-                            key={plan.id}
-                            title={plan.title}
-                            subtitle={plan.subtitle}
-                            price={plan.price}
-                            period={plan.period}
-                            features={plan.features}
-                            highlighted={plan.highlighted}
-                            badge={plan.badge}
-                        />
-                    ))}
+                    {plans && plans.length > 0 ? (
+                        plans.map((plan, index) => (
+                            <PlanCard
+                                key={plan._id}
+                                plan={plan}
+                                highlighted={index === 1} // Just for visual interest, highlight the middle one or similar
+                                onEdit={() => handleEdit(plan)}
+                                onDelete={() => handleDelete(plan._id)}
+                            />
+                        ))
+                    ) : (
+                        <div className="col-span-full py-20 text-center">
+                            <p className="text-lg text-gray-500">No subscription plans found. Create one to get started!</p>
+                        </div>
+                    )}
                 </div>
             </div>
+
+            <SubscriptionModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSubmit={handleSubmit}
+                initialData={selectedPlan}
+                title={selectedPlan ? "Edit Subscription Plan" : "Create New Plan"}
+                isLoading={createMutation.isPending || updateMutation.isPending}
+            />
         </section>
     );
 }
 
 interface PlanCardProps {
-    title: string;
-    subtitle: string;
-    price: string;
-    period: string;
-    features: string[];
+    plan: SubscriptionPlan;
     highlighted?: boolean;
-    badge?: string;
+    onEdit: () => void;
+    onDelete: () => void;
 }
 
 function PlanCard({
-    title,
-    subtitle,
-    price,
-    period,
-    features,
+    plan,
     highlighted = false,
-    badge,
+    onEdit,
+    onDelete,
 }: PlanCardProps) {
+    const { name, monthlyPrice, description, features } = plan;
     return (
         <div
             className={[
@@ -108,26 +148,30 @@ function PlanCard({
                     : "border-[#7f87ff] bg-white text-[#1f2937]",
             ].join(" ")}
         >
-            {highlighted && badge && (
-                <div className="mb-6 inline-flex rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-medium text-white">
-                    {badge}
+            <div className="flex items-start justify-between">
+                <div>
+                    <h3
+                        className={`text-[31px] font-semibold leading-none ${highlighted ? "text-white" : "text-[#4f46e5]"
+                            }`}
+                    >
+                        {name}
+                    </h3>
+
+                    <p
+                        className={`mt-3 text-sm leading-6 ${highlighted ? "text-white/80" : "text-[#8992a3]"
+                            }`}
+                    >
+                        {description}
+                    </p>
                 </div>
-            )}
-
-            <div>
-                <h3
-                    className={`text-[31px] font-semibold leading-none ${highlighted ? "text-white" : "text-[#4f46e5]"
+                <button
+                    onClick={onDelete}
+                    className={`rounded-full p-2 transition hover:bg-red-50 ${highlighted ? "text-white hover:bg-white/10" : "text-gray-400 hover:text-red-600"
                         }`}
+                    title="Delete Plan"
                 >
-                    {title}
-                </h3>
-
-                <p
-                    className={`mt-3 text-sm leading-6 ${highlighted ? "text-white/80" : "text-[#8992a3]"
-                        }`}
-                >
-                    {subtitle}
-                </p>
+                    <Trash2 className="h-5 w-5" />
+                </button>
             </div>
 
             <div className="mt-8 flex items-end gap-1">
@@ -135,13 +179,13 @@ function PlanCard({
                     className={`text-[54px] font-semibold leading-none ${highlighted ? "text-white" : "text-[#4f46e5]"
                         }`}
                 >
-                    {price}
+                    ${monthlyPrice}
                 </span>
                 <span
                     className={`mb-1 text-[20px] font-medium ${highlighted ? "text-white" : "text-[#4f46e5]"
                         }`}
                 >
-                    {period}
+                    /month
                 </span>
             </div>
 
@@ -163,13 +207,15 @@ function PlanCard({
             </div>
 
             <button
+                onClick={onEdit}
                 className={[
-                    "mt-8 h-12 w-full rounded-lg text-sm font-medium transition-all duration-300",
+                    "mt-8 flex h-12 w-full items-center justify-center gap-2 rounded-lg text-sm font-medium transition-all duration-300",
                     highlighted
                         ? "bg-white text-[#4f46e5] hover:bg-white/90"
                         : "bg-gradient-to-r from-[#18c8df] to-[#5f72f8] text-white hover:opacity-95",
                 ].join(" ")}
             >
+                <Edit2 className="h-4 w-4" />
                 Edit Plan
             </button>
         </div>

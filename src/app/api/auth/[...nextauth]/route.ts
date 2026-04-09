@@ -16,6 +16,7 @@ declare module "next-auth" {
       role: string;
       firstName?: string;
       lastName?: string;
+      name?: string;
       image?: string;
     };
     accessToken: string;
@@ -28,6 +29,7 @@ declare module "next-auth" {
     role: string;
     firstName?: string;
     lastName?: string;
+    name?: string;
     image?: string;
     accessToken: string;
     refreshToken: string;
@@ -41,6 +43,7 @@ declare module "next-auth/jwt" {
     role: string;
     firstName?: string;
     lastName?: string;
+    name?: string;
     image?: string;
     accessToken: string;
     refreshToken: string;
@@ -88,6 +91,7 @@ const handler = NextAuth({
             role: user.role,
             firstName: user.firstName,
             lastName: user.lastName,
+            name: user.name,
             image: user.profileImage || "",
             accessToken,
             refreshToken: user.refreshToken,
@@ -113,6 +117,7 @@ const handler = NextAuth({
         token.role = user.role;
         token.firstName = user.firstName;
         token.lastName = user.lastName;
+        token.name = user.name;
         token.image = user.image;
         token.accessToken = user.accessToken;
         token.refreshToken = user.refreshToken;
@@ -128,6 +133,7 @@ const handler = NextAuth({
         role: token.role as string,
         firstName: token.firstName,
         lastName: token.lastName,
+        name: token.name,
         image: token.image,
       };
 

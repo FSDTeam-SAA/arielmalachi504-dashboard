@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { signOut } from "next-auth/react";
+import { useState } from "react";
+import { LogoutModal } from "./LogoutModal";
 import {
   Grid2x2,
   Users,
@@ -35,11 +36,8 @@ const menuItems = [
 ];
 
 export default function Sidebar() {
+  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
   const pathname = usePathname();
-
-  const handleLogout = () => {
-    signOut({ callbackUrl: "/login" });
-  };
 
   return (
     <aside className="flex h-screen w-[220px] flex-shrink-0 flex-col justify-between border-r border-[#eef0f6] bg-white px-3 py-6">
@@ -93,12 +91,17 @@ export default function Sidebar() {
 
       {/* Logout */}
       <button
-        onClick={handleLogout}
-        className="flex h-9 w-full items-center justify-center gap-2 rounded-lg border border-[#fca5a5] text-[13px] font-medium text-[#ef4444] transition hover:bg-red-50 active:scale-[0.99]"
+        onClick={() => setLogoutDialogOpen(true)}
+        className="flex h-9 w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-[#fca5a5] text-[13px] font-medium text-[#ef4444] transition hover:bg-red-50 active:scale-[0.99]"
       >
         <LogOut className="h-[14px] w-[14px]" strokeWidth={2} />
         <span>Log out</span>
       </button>
+
+      <LogoutModal 
+        isOpen={logoutDialogOpen} 
+        onClose={() => setLogoutDialogOpen(false)} 
+      />
     </aside>
   );
 }

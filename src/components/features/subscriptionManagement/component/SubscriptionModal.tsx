@@ -181,10 +181,10 @@ export function SubscriptionModal({
                     </div>
 
                     <DialogFooter>
-                        <Button type="button" variant="outline" onClick={onClose}>
+                        <Button type="button" variant="outline" onClick={onClose} className="cursor-pointer">
                             Cancel
                         </Button>
-                        <Button type="submit" disabled={isLoading}>
+                        <Button type="submit" disabled={isLoading} className="cursor-pointer">
                             {isLoading ? "Saving..." : "Save Plan"}
                         </Button>
                     </DialogFooter>

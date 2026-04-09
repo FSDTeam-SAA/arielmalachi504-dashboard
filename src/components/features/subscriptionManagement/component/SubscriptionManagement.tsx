@@ -32,9 +32,9 @@ export default function SubscriptionManagement() {
     };
 
     const handleDelete = (id: string) => {
-        if (window.confirm("Are you sure you want to delete this plan?")) {
-            deleteMutation.mutate(id);
-        }
+
+        deleteMutation.mutate(id);
+
     };
 
     const handleSubmit = (data: CreateSubscriptionPlan) => {
@@ -86,7 +86,7 @@ export default function SubscriptionManagement() {
                 <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
                     <Button
                         onClick={handleCreate}
-                        className="h-11 rounded-md border border-[#5ab2ff] bg-white px-6 text-sm font-medium text-[#35a1ff] transition hover:bg-[#f7fbff]"
+                        className="h-11 cursor-pointer rounded-md border border-[#5ab2ff] bg-white px-6 text-sm font-medium text-[#35a1ff] transition hover:bg-[#f7fbff]"
                         variant="outline"
                     >
                         <Plus className="mr-2 h-4 w-4" />
@@ -166,7 +166,7 @@ function PlanCard({
                 </div>
                 <button
                     onClick={onDelete}
-                    className={`rounded-full p-2 transition hover:bg-red-50 ${highlighted ? "text-white hover:bg-white/10" : "text-gray-400 hover:text-red-600"
+                    className={`cursor-pointer rounded-full p-2 transition hover:bg-red-50 ${highlighted ? "text-white hover:bg-white/10" : "text-gray-400 hover:text-red-600"
                         }`}
                     title="Delete Plan"
                 >
@@ -189,7 +189,11 @@ function PlanCard({
                 </span>
             </div>
 
-            <div className="mt-8 space-y-4">
+            <div className="mt-4">
+                <p className={`text-lg font-medium ${highlighted ? "text-white" : "text-[#4f46e5]"}`}>{plan.credits} credits</p>
+            </div>
+
+            <div className="mt-5 space-y-4">
                 {features.map((feature, index) => (
                     <div key={index} className="flex items-start gap-3">
                         <CheckCircle2
@@ -209,7 +213,7 @@ function PlanCard({
             <button
                 onClick={onEdit}
                 className={[
-                    "mt-8 flex h-12 w-full items-center justify-center gap-2 rounded-lg text-sm font-medium transition-all duration-300",
+                    "mt-8 flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-lg text-sm font-medium transition-all duration-300",
                     highlighted
                         ? "bg-white text-[#4f46e5] hover:bg-white/90"
                         : "bg-gradient-to-r from-[#18c8df] to-[#5f72f8] text-white hover:opacity-95",

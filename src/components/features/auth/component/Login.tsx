@@ -1,11 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Eye, EyeOff, Lock, Mail } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { toast } from "sonner";
@@ -14,6 +10,7 @@ import Image from "next/image";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -36,7 +33,7 @@ export default function Login() {
       } else {
         toast.error(result?.error || "Login failed. Please try again.");
       }
-    } catch (err) {
+    } catch (error) {
       toast.error("Something went wrong. Please try again.");
     } finally {
       setIsLoading(false);
@@ -44,93 +41,97 @@ export default function Login() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50">
-      <div className="w-[500px] bg-white rounded-2xl shadow-lg px-8 py-10">
+    <div className="w-full">
+      <div className="text-center">
+        <h1 className="text-[48px] font-semibold leading-none text-[#4D8DFF]">
+          Welcome Back!
+        </h1>
+        <p className="mt-3 text-[15px] text-[#8C8C8C]">
+          Sign in to your account.
+        </p>
+      </div>
 
-        {/* Logo */}
-        <div className="flex justify-center mb-6">
-          <Image
-            src="/images/logo.png"
-            alt="Logo"
-            width={80}
-            height={80}
-            priority
+      <div className="mt-12 space-y-3">
+        {/* Email */}
+        <div>
+          <label className="mb-2 block text-[15px] font-medium text-[#6D6D6D]">
+            Email Address
+          </label>
+          <input
+            type="email"
+            placeholder="hello@example.com"
+            className="h-[54px] w-full rounded-md border border-transparent bg-[#F3F8FB] px-4 text-[15px] text-[#374151] outline-none placeholder:text-[#C0C7D1] focus:border-[#7AA7FF]"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
           />
         </div>
 
-        {/* Heading */}
-        <div className="text-center mb-6">
-          <h1 className="text-3xl font-bold text-secondary">IWMS Admin</h1>
-          <p className="mt-1 text-sm text-gray-500">
-            Secure access for moderation & support
-          </p>
-        </div>
-
-        <div className="space-y-3">
-
-          {/* Email */}
-          <div>
-            <Label className="text-sm font-medium">Email Address</Label>
-            <div className="relative mt-1">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-              <Input
-                type="email"
-                placeholder="Enter your email"
-                className="pl-10 py-5"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </div>
-          </div>
-
-          {/* Password */}
-          <div>
-            <Label className="text-sm font-medium">Password</Label>
-            <div className="relative mt-1">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-              <Input
-                type={showPassword ? "text" : "password"}
-                placeholder="Enter your password"
-                className="pl-10 pr-10 py-5"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-              >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
-            </div>
-          </div>
-
-          {/* Remember + Forgot */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <Checkbox id="remember" />
-              <label htmlFor="remember" className="text-sm text-gray-600 cursor-pointer">
-                Remember me
-              </label>
-            </div>
-
-            <Link
-              href="/forget-password"
-              className="text-sm text-[#E53838] hover:underline"
+        {/* Password */}
+        <div>
+          <label className="mb-2 block text-[15px] font-medium text-[#6D6D6D]">
+            Password
+          </label>
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              placeholder="********"
+              className="h-[54px] w-full rounded-md border border-transparent bg-[#F3F8FB] px-4 pr-12 text-[15px] text-[#374151] outline-none placeholder:text-[#C0C7D1] focus:border-[#7AA7FF]"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((prev) => !prev)}
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-[#7A7A7A] hover:text-[#4B5563]"
             >
-              Forgot password?
-            </Link>
+              {showPassword ? (
+                <EyeOff className="h-[18px] w-[18px]" />
+              ) : (
+                <Eye className="h-[18px] w-[18px]" />
+              )}
+            </button>
           </div>
-
-          {/* Button */}
-          <Button
-            className="w-full bg-primary text-white py-5 cursor-pointer"
-            onClick={handleSignIn}
-            disabled={isLoading}
-          >
-            {isLoading ? "Logging in..." : "Log In"}
-          </Button>
         </div>
+
+        {/* Remember + Forgot */}
+        <div className="flex items-center justify-between gap-4">
+          <label className="flex cursor-pointer items-center gap-2 text-sm text-[#8A8A8A]">
+            <input
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              className="h-4 w-4 rounded border border-[#D1D5DB]"
+            />
+            Remember me
+          </label>
+
+          <Link
+            href="/forget-password"
+            className="text-sm text-[#7EA7FF] underline-offset-2 hover:underline"
+          >
+            Forgot password?
+          </Link>
+        </div>
+
+        {/* Login Button */}
+        <button
+          onClick={handleSignIn}
+          disabled={isLoading}
+          className="flex h-[54px] w-full items-center justify-center rounded-md bg-gradient-to-r from-[#19C7DF] to-[#4D8DFF] text-[15px] font-medium text-white transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-70"
+        >
+          {isLoading ? "Logging in..." : "Log In"}
+        </button>
+
+        {/* Bottom Text */}
+        <p className="pt-8 text-center text-[15px] text-[#6D6D6D]">
+          Don&apos;t have an account?{" "}
+          <Link
+            href="/signup"
+            className="font-medium text-[#4D8DFF] hover:underline"
+          >
+            Sign Up
+          </Link>
+        </p>
       </div>
     </div>
   );

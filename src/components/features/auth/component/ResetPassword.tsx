@@ -22,7 +22,7 @@ export default function ResetPassword() {
       return;
     }
 
-    const res = await handleResetPassword(newPassword, confirmPassword);
+    const res = await handleResetPassword(newPassword);
     if (res.success) {
       toast.success("Password reset successfully!");
       router.push("/login");

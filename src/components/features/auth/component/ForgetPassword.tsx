@@ -18,10 +18,9 @@ export default function ForgetPassword() {
   const handleSendCode = async () => {
     const response = await handleForgotPassword(email);
 
-    if (response.success && response.data?.data?.accessToken) {
-      // Get the accessToken
-      const accessToken = response.data.data.accessToken;
-      router.push(`/verify-otp?token=${encodeURIComponent(accessToken)}`);
+    if (response.success) {
+      localStorage.setItem("user_email", email);
+      router.push(`/verify-otp`);
     }
   };
 

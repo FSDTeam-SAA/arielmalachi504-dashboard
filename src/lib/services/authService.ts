@@ -1,10 +1,18 @@
-// src/lib/services/authService.ts
 import axiosInstance from "../instance/axios-instance";
+import { AxiosError } from "axios";
+
+export interface AuthResponse<T = unknown> {
+  success: boolean;
+  data?: T;
+  message?: string;
+}
+
+
 
 // Forgot Password
-export const forgotPassword = async (email: string) => {
+export const forgotPassword = async (email: string): Promise<AuthResponse> => {
   try {
-    const response = await axiosInstance.post("/auth/forgot-password", {
+    const response = await axiosInstance.post("/auth/forget-password", {
       email,
     });
 
@@ -21,38 +29,29 @@ export const forgotPassword = async (email: string) => {
 };
 
 // Verify OTP
-export const verifyOtp = async (
-  payload: { otp: string },
-  tokenFromURL: string,
-) => {
+export const verifyOtp = async (payload: {
+  email: string;
+  otp: string;
+}): Promise<AuthResponse<{ resetToken: string }>> => {
   try {
-    const response = await axiosInstance.post("/auth/verify-otp", payload, {
-      headers: {
-        _customToken: tokenFromURL,
-      },
-    });
+    const response = await axiosInstance.post("/auth/verify-code", payload);
 
     return { success: true, data: response.data };
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const axiosError = error as AxiosError<{ message?: string }>;
     return {
       success: false,
-      message: error.response?.data?.message || "Verification failed",
+      message: axiosError.response?.data?.message || "Verification failed",
     };
   }
 };
 
 // Resend Forgot OTP
-export const resendForgotOtp = async (tokenFromURL: string) => {
+export const resendForgotOtp = async (email: string): Promise<AuthResponse> => {
   try {
-    const response = await axiosInstance.post(
-      "/auth/resend-forgot-otp",
-      {},
-      {
-        headers: {
-          _customToken: tokenFromURL,
-        },
-      },
-    );
+    const response = await axiosInstance.post("/auth/resend-forgot-otp", {
+      email,
+    });
 
     return {
       success: true,
@@ -68,26 +67,21 @@ export const resendForgotOtp = async (tokenFromURL: string) => {
 
 // Reset Password
 export const resetPassword = async (
+  email: string,
   newPassword: string,
-  repeatNewPassword: string,
-  tokenFromURL: string,
-) => {
+): Promise<AuthResponse> => {
   try {
-    const response = await axiosInstance.post(
-      "/auth/reset-password",
-      { newPassword, repeatNewPassword },
-      {
-        headers: {
-          _customToken: tokenFromURL,
-        },
-      },
-    );
+    const response = await axiosInstance.post("/auth/reset-password", {
+      email,
+      newPassword,
+    });
 
     return { success: true, data: response.data };
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const axiosError = error as AxiosError<{ message?: string }>;
     return {
       success: false,
-      message: error.response?.data?.message || "Reset password failed",
+      message: axiosError.response?.data?.message || "Reset password failed",
     };
   }
 };

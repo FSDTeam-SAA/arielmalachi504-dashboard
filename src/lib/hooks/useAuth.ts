@@ -3,18 +3,21 @@
 
 import { useState } from "react";
 import {
+  AuthResponse,
   forgotPassword,
   resendForgotOtp,
   resetPassword,
   verifyOtp,
 } from "../services/authService";
 
+
 export default function useAuth() {
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState(null);
+  const [result, setResult] = useState<unknown>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const handleForgotPassword = async (email: string) => {
+  const handleForgotPassword = async (email: string): Promise<AuthResponse> => {
+
     setLoading(true);
     setError(null);
 
@@ -31,21 +34,23 @@ export default function useAuth() {
   };
 
   // Handle OTP verification
-  const handleVerifyOtp = async (otp: string) => {
+  const handleVerifyOtp = async (
+    otp: string,
+  ): Promise<AuthResponse<{ resetToken: string }>> => {
+
+
     setLoading(true);
     setError(null);
 
-    // Extract token from URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const tokenFromURL = urlParams.get("token") || "";
+    const email = localStorage.getItem("user_email") || "";
 
-    if (!tokenFromURL) {
-      setError("Invalid or missing token");
+    if (!email) {
+      setError("Email not found. Please try the forgot password flow again.");
       setLoading(false);
-      return { success: false, message: "No token found in URL" };
+      return { success: false, message: "Email not found in storage" };
     }
 
-    const res = await verifyOtp({ otp }, tokenFromURL);
+    const res = await verifyOtp({ email, otp });
 
     if (res.success) {
       setResult(res.data);
@@ -58,20 +63,20 @@ export default function useAuth() {
   };
 
   //  NEW — Resend OTP
-  const handleResendOtp = async () => {
+  const handleResendOtp = async (): Promise<AuthResponse> => {
+
     setLoading(true);
     setError(null);
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const tokenFromURL = urlParams.get("token") || "";
+    const email = localStorage.getItem("user_email") || "";
 
-    if (!tokenFromURL) {
-      setError("Invalid or missing token");
+    if (!email) {
+      setError("Email not found. Please try the forgot password flow again.");
       setLoading(false);
-      return { success: false, message: "No token found in URL" };
+      return { success: false, message: "Email not found in storage" };
     }
 
-    const res = await resendForgotOtp(tokenFromURL);
+    const res = await resendForgotOtp(email);
 
     if (res.success) {
       setResult(res.data);
@@ -86,22 +91,19 @@ export default function useAuth() {
   // Reset Password hook
   const handleResetPassword = async (
     newPassword: string,
-    confirmPassword: string,
-  ) => {
+  ): Promise<AuthResponse> => {
     setLoading(true);
     setError(null);
 
-    // Get token from URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const tokenFromURL = urlParams.get("token") || "";
+    const email = localStorage.getItem("user_email") || "";
 
-    if (!tokenFromURL) {
-      setError("Invalid or missing token");
+    if (!email) {
+      setError("Email not found. Please try the forgot password flow again.");
       setLoading(false);
-      return { success: false, message: "No token found in URL" };
+      return { success: false, message: "Email not found in storage" };
     }
 
-    const res = await resetPassword(newPassword, confirmPassword, tokenFromURL);
+    const res = await resetPassword(email, newPassword);
 
     if (res.success) {
       setResult(res.data);

@@ -113,10 +113,9 @@ export default function VerifyOTP() {
               value={digit}
               onChange={(e) => handleChange(e.target.value, i)}
               className={`w-14 h-14 text-2xl text-center border rounded-lg outline-none transition
-                ${
-                  digit
-                    ? "border-secondary text-secondary"
-                    : "border-gray-300 text-gray-700"
+                ${digit
+                  ? "border-secondary text-secondary"
+                  : "border-gray-300 text-gray-700"
                 }`}
             />
           ))}

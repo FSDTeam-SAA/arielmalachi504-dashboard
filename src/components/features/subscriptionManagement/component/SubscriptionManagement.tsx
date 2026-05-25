@@ -59,7 +59,7 @@ export default function SubscriptionManagement() {
                     <div className="mb-6 flex justify-end">
                         <Skeleton className="h-11 w-32" />
                     </div>
-                    <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {[1, 2, 3].map((i) => (
                             <Skeleton key={i} className="h-[500px] w-full rounded-[16px]" />
                         ))}
@@ -94,7 +94,7 @@ export default function SubscriptionManagement() {
                     </Button>
                 </div>
 
-                <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {plans && plans.length > 0 ? (
                         plans.map((plan, index) => (
                             <PlanCard

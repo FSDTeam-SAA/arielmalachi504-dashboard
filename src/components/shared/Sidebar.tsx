@@ -10,6 +10,7 @@ import {
   CreditCard,
   Settings,
   LogOut,
+  X,
 } from "lucide-react";
 
 const menuItems = [
@@ -35,16 +36,20 @@ const menuItems = [
   },
 ];
 
-export default function Sidebar() {
+interface SidebarProps {
+  onClose?: () => void;
+}
+
+export default function Sidebar({ onClose }: SidebarProps) {
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
   const pathname = usePathname();
 
   return (
-    <aside className="flex h-screen w-[220px] flex-shrink-0 flex-col justify-between border-r border-[#eef0f6] bg-white px-3 py-6">
+    <aside className="flex h-full w-full lg:w-[220px] flex-shrink-0 flex-col justify-between border-r border-[#eef0f6] bg-white px-3 py-6">
       <div>
-        {/* Logo */}
-        <div className="mb-10 flex items-center justify-center px-2">
-          <Link href="/" className="flex items-center gap-2">
+        {/* Logo & Close */}
+        <div className="mb-10 flex items-center justify-between px-2">
+          <Link href="/" onClick={onClose} className="flex items-center gap-2">
             {/* Icon mark */}
             <div className="relative flex h-7 w-7 items-center justify-center">
               <span className="absolute h-[5px] w-[18px] rounded-full bg-[#20c4f4] rotate-[25deg] -translate-y-[6px]" />
@@ -55,6 +60,15 @@ export default function Sidebar() {
               Brandflowlabs
             </span>
           </Link>
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="lg:hidden p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded transition"
+              aria-label="Close menu"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          )}
         </div>
 
         {/* Navigation */}
@@ -70,6 +84,7 @@ export default function Sidebar() {
               <Link
                 key={item.label}
                 href={item.href}
+                onClick={onClose}
                 className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-medium transition-all ${
                   isActive
                     ? "bg-gradient-to-r from-[#4a8cff] to-[#5b9fff] text-white shadow-sm"

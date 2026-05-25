@@ -80,6 +80,9 @@ export interface UserGenerationHistory {
     };
     posters: PosterGeneration[];
     logos: LogoGeneration[];
+    isBlocked?: boolean;
+    blockedUntil?: string | null;
+    isPermanentBlock?: boolean;
 }
 
 export interface PaginationInfo {

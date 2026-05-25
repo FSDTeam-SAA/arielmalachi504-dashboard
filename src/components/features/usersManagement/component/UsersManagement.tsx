@@ -79,6 +79,9 @@ export default function UsersManagement() {
                                         Remaining Credits
                                     </th>
                                     <th className="px-6 py-4 text-left text-[14px] font-semibold text-[#1f2937]">
+                                        Status
+                                    </th>
+                                    <th className="px-6 py-4 text-left text-[14px] font-semibold text-[#1f2937]">
                                         Actions
                                     </th>
                                 </tr>
@@ -88,7 +91,7 @@ export default function UsersManagement() {
                                 {isLoading ? (
                                     Array.from({ length: 5 }).map((_, idx) => (
                                         <tr key={idx} className="border-t border-[#e5e7eb]">
-                                            {Array.from({ length: 6 }).map((_, cellIdx) => (
+                                            {Array.from({ length: 7 }).map((_, cellIdx) => (
                                                 <td key={cellIdx} className="px-6 py-5">
                                                     <Skeleton className="h-4 w-full" />
                                                 </td>
@@ -97,7 +100,7 @@ export default function UsersManagement() {
                                     ))
                                 ) : users.length === 0 ? (
                                     <tr>
-                                        <td colSpan={6} className="px-6 py-10 text-center text-gray-500">
+                                        <td colSpan={7} className="px-6 py-10 text-center text-gray-500">
                                             No users found
                                         </td>
                                     </tr>
@@ -121,6 +124,9 @@ export default function UsersManagement() {
                                             </td>
                                             <td className="px-6 py-5 text-[14px] font-bold text-primary">
                                                 {user.remainingCredits}
+                                            </td>
+                                            <td className="px-6 py-5">
+                                                <StatusBadge isBlocked={!!user.isBlocked} />
                                             </td>
                                             <td className="px-6 py-5">
                                                 <div className="flex items-center gap-4">
@@ -189,7 +195,7 @@ export default function UsersManagement() {
                     setIsModalOpen(false);
                     setSelectedUser(null);
                 }}
-                user={selectedUser}
+                user={users.find((u) => u.userId === selectedUser?.userId) || selectedUser}
             />
         </section>
     );

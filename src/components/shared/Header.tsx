@@ -1,7 +1,7 @@
 "use client";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { LogOut } from "lucide-react";
+import { LogOut, Menu } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -15,7 +15,11 @@ const pageTitles: Record<string, { title: string; subtitle: string }> = {
   "/settings": { title: "Settings", subtitle: "Configure your preferences." },
 };
 
-export default function DashboardHeader() {
+interface HeaderProps {
+  onMenuClick?: () => void;
+}
+
+export default function DashboardHeader({ onMenuClick }: HeaderProps) {
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
   const pathname = usePathname();
   const { data: session } = useSession();
@@ -35,17 +39,28 @@ export default function DashboardHeader() {
 
   return (
     <>
-      <header className="flex h-[64px] w-full items-center justify-between border-b border-[#eef0f6] bg-white px-6">
-        {/* Left: Page title */}
-        <div className="flex flex-col justify-center">
-          <h1 className="text-[15px] font-semibold text-[#1e293b] leading-tight">
-            {pageInfo.title}
-          </h1>
-          <p className="text-[12px] text-[#94a3b8]">{pageInfo.subtitle}</p>
+      <header className="flex h-[64px] w-full items-center justify-between border-b border-[#eef0f6] bg-white px-4 md:px-6">
+        {/* Left: Page title & Mobile Menu trigger */}
+        <div className="flex items-center gap-3 overflow-hidden">
+          {onMenuClick && (
+            <button
+              onClick={onMenuClick}
+              className="lg:hidden p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md transition"
+              aria-label="Open menu"
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+          )}
+          <div className="flex flex-col justify-center min-w-0">
+            <h1 className="text-[14px] md:text-[15px] font-semibold text-[#1e293b] leading-tight truncate">
+              {pageInfo.title}
+            </h1>
+            <p className="text-[10px] md:text-[12px] text-[#94a3b8] truncate hidden sm:block">{pageInfo.subtitle}</p>
+          </div>
         </div>
 
         {/* Right: Actions */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-shrink-0">
           {/* Avatar + name */}
           <button
             onClick={() => setLogoutDialogOpen(true)}

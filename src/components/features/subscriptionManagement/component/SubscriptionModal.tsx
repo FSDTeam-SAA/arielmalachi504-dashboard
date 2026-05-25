@@ -102,11 +102,11 @@ export function SubscriptionModal({
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-[500px]">
-                <DialogHeader>
+            <DialogContent className="w-[95vw] sm:max-w-[500px] max-h-[90vh] overflow-hidden flex flex-col p-5">
+                <DialogHeader className="pb-2 border-b flex-shrink-0">
                     <DialogTitle>{title}</DialogTitle>
                 </DialogHeader>
-                <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
+                <form onSubmit={handleSubmit(onFormSubmit)} className="flex-1 overflow-y-auto py-3 pr-1 space-y-4">
                     <div className="space-y-2">
                         <Label htmlFor="name">Plan Name</Label>
                         <Input id="name" {...register("name")} placeholder="e.g. Basic Plan" />

@@ -7,9 +7,10 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import { UserGenerationHistory, PosterGeneration, LogoGeneration } from "../types/user";
-import { Calendar, CreditCard, Layers, Layout, Palette, Type } from "lucide-react";
+import { Calendar, CreditCard, Layers, Layout, Palette, Type, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { useState } from "react";
+import { useBlockUser, useUnblockUser } from "../hooks/userHooks";
 
 interface UserGenerationModalProps {
     isOpen: boolean;
@@ -19,6 +20,14 @@ interface UserGenerationModalProps {
 
 export function UserGenerationModal({ isOpen, onClose, user }: UserGenerationModalProps) {
     const [activeTab, setActiveTab] = useState<"posters" | "logos">("posters");
+
+    const blockMutation = useBlockUser();
+    const unblockMutation = useUnblockUser();
+
+    const [isPermanent, setIsPermanent] = useState<boolean>(false);
+    const [duration, setDuration] = useState<number>(1);
+    const [unit, setUnit] = useState<"minutes" | "hours" | "days">("days");
+    const [showBlockForm, setShowBlockForm] = useState<boolean>(false);
 
     if (!user) return null;
 
@@ -48,6 +57,160 @@ export function UserGenerationModal({ isOpen, onClose, user }: UserGenerationMod
                     <div className="flex flex-col">
                         <span className="text-xs text-slate-500">Logos</span>
                         <span className="text-lg font-bold">{user.logoCount}</span>
+                    </div>
+                </div>
+
+                {/* Admin Actions: Block/Unblock Panel */}
+                <div className="mt-6 border-t border-slate-200 pt-4">
+                    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                            <div className="flex items-center gap-2">
+                                <span className={`flex h-2.5 w-2.5 rounded-full ${user.isBlocked ? "bg-red-500 animate-pulse" : "bg-green-500"}`} />
+                                <h3 className="text-sm font-semibold text-slate-800">Account Access Control</h3>
+                            </div>
+                            <div>
+                                {user.isBlocked ? (
+                                    <span className="inline-flex items-center rounded-full bg-red-50 px-2.5 py-0.5 text-xs font-semibold text-red-700 ring-1 ring-inset ring-red-600/10">
+                                        Blocked {user.isPermanentBlock ? "(Permanent)" : `(Until ${user.blockedUntil ? format(new Date(user.blockedUntil), "MMM d, yyyy h:mm a") : ""})`}
+                                    </span>
+                                ) : (
+                                    <span className="inline-flex items-center rounded-full bg-green-50 px-2.5 py-0.5 text-xs font-semibold text-green-700 ring-1 ring-inset ring-green-600/20">
+                                        Active / Access Granted
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+
+                        {user.isBlocked ? (
+                            <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between rounded-lg bg-red-50/50 p-3 border border-red-100">
+                                <div className="text-xs text-red-700">
+                                    This user is currently blocked from accessing the platform.
+                                    {user.blockedUntil && (
+                                        <div className="mt-1 font-semibold">
+                                            Expires: {format(new Date(user.blockedUntil), "PPP p")}
+                                        </div>
+                                    )}
+                                </div>
+                                <button
+                                    onClick={() => unblockMutation.mutate(user.userId)}
+                                    disabled={unblockMutation.isPending}
+                                    className="inline-flex items-center justify-center rounded-md bg-red-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 cursor-pointer transition disabled:opacity-50"
+                                >
+                                    {unblockMutation.isPending ? (
+                                        <>
+                                            <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                                            Unblocking...
+                                        </>
+                                    ) : (
+                                        "Unblock User"
+                                    )}
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="mt-4">
+                                {!showBlockForm ? (
+                                    <button
+                                        onClick={() => setShowBlockForm(true)}
+                                        className="inline-flex items-center justify-center rounded-md bg-white border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50 cursor-pointer transition"
+                                    >
+                                        Block User
+                                    </button>
+                                ) : (
+                                    <div className="rounded-lg bg-slate-50 p-4 border border-slate-100 mt-2">
+                                        <div className="flex items-center justify-between mb-3 border-b border-slate-200 pb-2">
+                                            <h4 className="text-xs font-semibold text-slate-700">Configure Block Restriction</h4>
+                                            <button 
+                                                onClick={() => setShowBlockForm(false)}
+                                                className="text-xs text-slate-400 hover:text-slate-600 transition"
+                                            >
+                                                Cancel
+                                            </button>
+                                        </div>
+
+                                        <div className="space-y-4">
+                                            <div className="flex items-center gap-6">
+                                                <label className="flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-700">
+                                                    <input
+                                                        type="radio"
+                                                        name="blockType"
+                                                        checked={isPermanent}
+                                                        onChange={() => setIsPermanent(true)}
+                                                        className="text-primary focus:ring-primary h-4 w-4"
+                                                    />
+                                                    Permanent Block
+                                                </label>
+                                                <label className="flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-700">
+                                                    <input
+                                                        type="radio"
+                                                        name="blockType"
+                                                        checked={!isPermanent}
+                                                        onChange={() => setIsPermanent(false)}
+                                                        className="text-primary focus:ring-primary h-4 w-4"
+                                                    />
+                                                    Temporary Block
+                                                </label>
+                                            </div>
+
+                                            {!isPermanent && (
+                                                <div className="flex items-end gap-3 max-w-sm">
+                                                    <div className="flex-1 space-y-1">
+                                                        <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Duration</label>
+                                                        <input
+                                                            type="number"
+                                                            min={1}
+                                                            value={duration}
+                                                            onChange={(e) => setDuration(Math.max(1, parseInt(e.target.value) || 1))}
+                                                            className="block w-full rounded-md border border-slate-300 bg-white py-1.5 px-3 text-slate-900 focus:ring-2 focus:ring-inset focus:ring-primary sm:text-xs sm:leading-6"
+                                                        />
+                                                    </div>
+                                                    <div className="flex-1 space-y-1">
+                                                        <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Unit</label>
+                                                        <select
+                                                            value={unit}
+                                                            onChange={(e) => setUnit(e.target.value as "minutes" | "hours" | "days")}
+                                                            className="block w-full rounded-md border border-slate-300 bg-white py-1.5 px-2 text-slate-900 focus:ring-2 focus:ring-inset focus:ring-primary sm:text-xs sm:leading-6"
+                                                        >
+                                                            <option value="minutes">Minutes</option>
+                                                            <option value="hours">Hours</option>
+                                                            <option value="days">Days</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            <div className="flex justify-end gap-2 border-t border-slate-200 pt-3">
+                                                <button
+                                                    onClick={() => {
+                                                        blockMutation.mutate(
+                                                            {
+                                                                id: user.userId,
+                                                                data: isPermanent
+                                                                    ? { isPermanent: true }
+                                                                    : { isPermanent: false, duration, unit }
+                                                            },
+                                                            {
+                                                                onSuccess: () => setShowBlockForm(false)
+                                                            }
+                                                        );
+                                                    }}
+                                                    disabled={blockMutation.isPending}
+                                                    className="inline-flex items-center justify-center rounded-md bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900 cursor-pointer transition disabled:opacity-50"
+                                                >
+                                                    {blockMutation.isPending ? (
+                                                        <>
+                                                            <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                                                            Blocking...
+                                                        </>
+                                                    ) : (
+                                                        "Confirm Block"
+                                                    )}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
                 </div>
 
